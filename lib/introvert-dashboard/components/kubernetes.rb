@@ -3,7 +3,7 @@
 module IntrovertDashboard::Components
   class Kubernetes < IntrovertDashboard::BaseComponent
     def k8s_query(path)
-      uri = URI('https://kubernetes.default.svc').tap do |u|
+      uri = URI('http://kubernetes.introvert.software:8888').tap do |u|
         u.path = path
       end
       data = JSON.parse(Net::HTTP.get(uri), symbolize_names: true)
