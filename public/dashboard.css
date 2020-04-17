@@ -1,0 +1,50 @@
+body {
+  background: black;
+  color: white;
+
+  padding-top: 5rem;
+}
+
+.card {
+  border: 1px solid rgba(255,255,255, .125);
+  background-color: #333;
+  color: #fff;
+  margin: 0.5rem;
+}
+
+.card-header {
+  background-color: rgba(255,255,255, .06);
+  border-bottom: 1px solid rgba(255,255,255, .125);
+}
+
+a {
+  color: white;
+}
+a:hover {
+  color: rgb(140, 220, 255);
+}
+
+a.text-danger:hover, a.text-danger:focus {
+  color: #fc555d !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: #eee;
+  background-color: #555;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: rgba(255,255,255, .125);
+}
+
+.nav-xs {
+  font-size: 0.8rem;
+} 
+
+.nav-xs.nav-tabs .nav-link {
+  border: 1px
+}
+
+.nav-xs .nav-link {
+  padding: 0.1rem 0.5rem;
+}
