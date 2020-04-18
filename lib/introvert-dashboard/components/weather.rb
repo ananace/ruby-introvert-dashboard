@@ -238,7 +238,7 @@ module IntrovertDashboard::Components
     end
 
     get '/' do
-      get_forecast(config[:lon], config[:lat]).to_json
+      get_forecast(config[:lat], config[:lon]).to_json
     end
   end
 end
