@@ -15,6 +15,7 @@ module IntrovertDashboard
 
     get '/card' do
       return pass unless self.class.card?
+      return pass unless enabled?
 
       frag = Nokogiri::HTML.fragment('')
       Nokogiri::HTML::Builder.with(frag) do |doc|
@@ -23,6 +24,15 @@ module IntrovertDashboard
 
       content_type 'text/html'
       frag.to_html
+    end
+
+    def config
+      user_token = request.env['HTTP_AUTHENTICATION'].gsub('Bearer ', '') if request.env.key? 'HTTP_AUTHENTICATION'
+      IntrovertDashboard::Config.component(self.class.api_name, user_token: user_token)
+    end
+
+    def enabled?
+      config[:enabled]
     end
 
     def self.api_name

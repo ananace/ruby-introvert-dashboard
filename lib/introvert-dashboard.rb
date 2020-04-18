@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'introvert-dashboard/base_component'
+require 'introvert-dashboard/config'
 require 'introvert-dashboard/server'
 
 require 'json'

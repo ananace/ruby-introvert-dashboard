@@ -1,5 +1,7 @@
 require 'introvert-dashboard'
 
+IntrovertDashboard::Config.load 'config.yml' if File.exist? 'config.yml'
+
 IntrovertDashboard::Components.constants.each do |const|
   klass = IntrovertDashboard::Components.const_get const
   next unless klass.available?

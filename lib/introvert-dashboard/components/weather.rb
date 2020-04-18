@@ -172,7 +172,7 @@ module IntrovertDashboard::Components
     end
 
     def render_card(doc)
-      doc.div.card.weather! style: 'width: 235px', 'data-order': 0  do
+      doc.div.card.weather! style: 'width: 235px', 'data-order': config[:order]  do
         doc.div class: 'card-header' do
           doc.nav do
             doc.ul.nav class: 'nav-xs nav-tabs card-header-tabs', role: :tablist do
@@ -238,7 +238,7 @@ module IntrovertDashboard::Components
     end
 
     get '/' do
-      get_forecast(58.1971, 15.0538).to_json
+      get_forecast(config[:lon], config[:lat]).to_json
     end
   end
 end

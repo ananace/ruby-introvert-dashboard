@@ -1,0 +1,25 @@
+---
+# Global configuration of components
+components:
+  kubernetes:
+    # enabled: true
+    order: 1
+    url: https://kubernetes.default.svc
+    access_token:
+      file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    # access_token: 'token goes here'
+    ca:
+      file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+  weather:
+    # enabled: true
+    order: 0
+    lat: 25.0000
+    lon: 71.0000
+
+users:
+  - token: 'This is a user token'
+    components:
+      weather:
+        lat: 38.8693
+        lon: -77.0536

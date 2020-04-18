@@ -3,7 +3,7 @@
 module IntrovertDashboard::Components
   class Kubernetes < IntrovertDashboard::BaseComponent
     def k8s_query(path)
-      uri = URI('http://kubernetes.introvert.software:8888').tap do |u|
+      uri = URI(config[:url]).tap do |u|
         u.path = path
       end
       data = JSON.parse(Net::HTTP.get(uri), symbolize_names: true)
@@ -12,7 +12,7 @@ module IntrovertDashboard::Components
     end
 
     def render_card(doc)
-      doc.div.card.k8s! style: 'width: 235px', 'data-order': 1 do
+      doc.div.card.k8s! style: 'width: 235px', 'data-order': config[:order] do
         doc.div class: 'card-header' do
           doc.nav do
             doc.ul.nav class: 'nav-xs nav-tabs card-header-tabs', role: :tablist do
