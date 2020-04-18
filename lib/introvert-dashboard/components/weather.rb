@@ -218,14 +218,13 @@ module IntrovertDashboard::Components
               for (i in days) {
                 var day = days[i];
                 var data = resp.data[day];
-                var average = (day == 'tomorrow' || isDayTime) ? 'average_day' : 'average_night';
-                var curdata = ((day == 'today') ? data.by_hour[0] : data[average]) || data.average;
+                var curdata = (day == 'today') ? data.by_hour[0] : data.average;
 
                 var id = "weather" + day.charAt(0).toUpperCase() + day.substring(1);
-                var title = '<i style="font-size: 32pt; width: 4rem" class="text-center wi ' + curdata.symbol + ' mr-2"></i><span class="align-top d-inline-flex flex-column"><span>' + curdata.temperature + '<i class="wi wi-celsius"></i></span><span class="text-white-50" style="font-size:9pt">' + data.average_day.temperature + '<i class="wi wi-celsius"></i> ' + data.average_night.temperature + '<i class="wi wi-celsius"></i></span></span>';
+                var title = '<i style="font-size: 32pt; width: 4rem" class="text-center wi ' + curdata.symbol + ' mr-2"></i><span class="align-top d-inline-flex flex-column"><span>' + curdata.temperature + '<i class="wi wi-celsius"></i></span><span class="text-white-50" style="font-size:9pt">' + data.average_day.temperature + '<i class="wi wi-celsius mr-1"></i>' + data.average_night.temperature + '<i class="wi wi-celsius"></i></span></span>';
                 $('#' + id + ' .card-title').html(title);
 
-                var subtitle = '<i class="wi wi-wind towards-' + Math.round(curdata.wind.dir) + '-deg mr-1"></i>' + data[average].wind.speed + '<small>m/s</small>&nbsp;<i class="wi wi-humidity mr-1"></i>' + curdata.humidity + '<small>%</small>';
+                var subtitle = '<i class="wi wi-wind from-' + Math.round(curdata.wind.dir) + '-deg mr-1"></i>' + curdata.wind.speed + '<small>m/s</small>&nbsp;<i class="wi wi-humidity mr-1"></i>' + curdata.humidity + '<small>%</small>';
                 $('#' + id + ' .card-subtitle').html(subtitle);
               }
             });
