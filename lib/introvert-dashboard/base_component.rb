@@ -74,7 +74,6 @@ module IntrovertDashboard
 
         file
       end.reject(&:nil?).first
-      puts file
       return unless file
 
       mtime = File.stat(file).mtime
@@ -89,8 +88,6 @@ module IntrovertDashboard
 
         card = ERB.new(card, trim_mode: '-').result(binding)
       end
-
-      puts "card: #{card.inspect}"
 
       doc << card
     end
