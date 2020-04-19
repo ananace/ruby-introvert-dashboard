@@ -184,7 +184,7 @@ module IntrovertDashboard::Components
                   doc.text 'Today'
                 end
               end
-              doc.li class: 'nav-item' do
+              doc.li class: 'nav-item', 'data-duration': 30 do
                 doc.a.weatherTomorrowTab! class: 'nav-link', href: '#weatherTomorrow', role: :tab, 'data-toggle': :tab, 'aria-controls': 'weatherTomorrow', 'aria-selected': false do
                   doc.text 'Tomorrow'
                 end

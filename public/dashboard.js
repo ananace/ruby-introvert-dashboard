@@ -6,6 +6,13 @@ function init() {
   checkForUpdates();
 }
 
+function postInit() {
+  console.log("All cards loaded");
+
+  sortCards();
+  registerGlobalHooks();
+}
+
 function reflect(promise){
     return promise.then(function(v){ return {v:v, status: "fulfilled" }},
                         function(e){ return {e:e, status: "rejected" }});
@@ -33,12 +40,15 @@ function createCards() {
 
     Promise.all(queries.map(reflect))
       .then(function() {
-        console.log("All cards loaded, sorting");
-        $('#card-container component').sort(function(a, b) {
-          return parseInt($(a).data('order')) > parseInt($(b).data('order'));
-        }).appendTo('#card-container');
+        postInit();
       });
   });
+}
+
+function sortCards() {
+  $('#card-container component').sort(function(a, b) {
+    return parseInt($(a).data('order')) > parseInt($(b).data('order'));
+  }).appendTo('#card-container');
 }
 
 function writeClock() {
@@ -53,6 +63,60 @@ function writeClock() {
   $('#clock').text(h + ':' + m);
 
   setTimeout(writeClock, 1000);
+}
+
+function registerGlobalHooks() {
+  $('.nav-link').click(function(event) {
+    var elem = $(event.target);
+    var nav = elem.closest('.nav');
+    var pb = elem.closest('.card-header').siblings('.progress');
+    var id = undefined;
+    var pbid = undefined;
+
+    var duration = parseInt(
+      elem.closest('.nav-item').data('duration') ||
+      nav.data('duration') ||
+      '10'
+    );
+
+    if (duration == 0) {
+      return;
+    }
+
+    if (elem.data('default') === undefined) {
+      id = setTimeout(function() {
+        nav.find('[data-default]')
+           .click();
+      }, duration * 1000);
+
+      if (pb.length == 0) {
+        pb = $('<div class="progress" style="height:1px"><div class="progress-bar" role="progressbar" style="width:0"></div></div>').insertAfter(elem.closest('.card-header'));
+      }
+      
+      var bar = pb.find('.progress-bar');
+      bar.css('transition', 'none')
+         .width(0);
+
+      setTimeout(function() {
+        bar.width(0)
+           .css('transition', 'width '+duration+'s linear')
+           .width('100%');
+      }, 1);
+    }
+
+    if (nav.data('cur-timeout')) {
+      clearTimeout(parseInt(nav.data('cur-timeout')));
+
+      if (id === undefined) {
+        var bar = pb.find('.progress-bar');
+        bar.css('transition', 'width 1s ease')
+           .width(0);
+      }
+    }
+    if (id !== undefined) {
+      nav.data('cur-timeout', id);
+    }
+  });
 }
 
 var pageVersion;
