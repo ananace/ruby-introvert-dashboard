@@ -69,6 +69,10 @@ function registerGlobalHooks() {
   $('.nav-link').click(function(event) {
     var elem = $(event.target);
     var nav = elem.closest('.nav');
+    if (nav.find('[data-default]').length == 0) {
+      return;
+    }
+
     var pb = elem.closest('.card-header').siblings('.progress');
     var id = undefined;
     var pbid = undefined;
