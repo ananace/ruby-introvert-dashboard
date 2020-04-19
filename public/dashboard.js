@@ -3,6 +3,7 @@ function init() {
 
   writeClock();
   createCards();
+  checkForUpdates();
 }
 
 function reflect(promise){
@@ -43,6 +44,22 @@ function writeClock() {
   $('#clock').text(h + ':' + m);
 
   setTimeout(writeClock, 1000);
+}
+
+var pageVersion;
+
+function checkForUpdates() {
+  axios.get('/api/status/version')
+    .then(function(resp) {
+      if (pageVersion !== undefined && pageVersion != resp.data.version) {
+        console.log("Version updated, reloading.");
+        location.reload(true);
+      }
+
+      pageVersion = resp.data.version;
+    });
+
+  setTimeout(checkForUpdates, 30000);
 }
 
 $(function() {
