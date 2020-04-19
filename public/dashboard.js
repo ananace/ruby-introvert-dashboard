@@ -47,7 +47,6 @@ function writeClock() {
 }
 
 var pageVersion;
-
 function checkForUpdates() {
   axios.get('/api/status/version')
     .then(function(resp) {
@@ -61,6 +60,30 @@ function checkForUpdates() {
 
   setTimeout(checkForUpdates, 30000);
 }
+
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
+
+// Inject user token into headers for API requests
+var axios = (function() {
+  headers = { };
+  token = getUrlParameter('token');
+  if (token) {
+    headers.Authentication = "Bearer " + getUrlParameter('token');
+  }
+
+  instance = axios.create({
+    headers: headers,
+    timeout: 250,
+    maxRedirects: 0
+  });
+
+  return instance;
+})();
 
 $(function() {
   init();
