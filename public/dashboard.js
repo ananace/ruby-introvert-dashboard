@@ -19,13 +19,22 @@ function createCards() {
       queries.push(axios.get(resp.data[component])
         .then(function(resp) {
           $(resp.data).appendTo('#card-container');
-      }));
+        })
+        .catch(function(resp) {
+          console.log('Card for ' + component + ' failed to load');
+          if (resp.data) {
+            console.log(resp.data.error);
+          } else {
+            console.log(resp);
+          }
+        })
+      );
     }
 
     Promise.all(queries.map(reflect))
       .then(function() {
-        console.log("Sorting");
-        $('#card-container .card').sort(function(a, b) {
+        console.log("All cards loaded, sorting");
+        $('#card-container component').sort(function(a, b) {
           return parseInt($(a).data('order')) > parseInt($(b).data('order'));
         }).appendTo('#card-container');
       });
@@ -78,7 +87,6 @@ var axios = (function() {
 
   instance = axios.create({
     headers: headers,
-    timeout: 250,
     maxRedirects: 0
   });
 

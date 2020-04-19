@@ -1,0 +1,39 @@
+<div id="k8s" class="card d-flex" style="min-width: 236px">
+  <div class="card-header">
+    <nav>
+      <ul class="nav nav-xs nav-tabs card-header-tabs" role="tablist">
+        <li class="nav-item mr-auto pr-4">K8s</li>
+        <li class="nav-item">
+          <a href="#k8sOverview" id="k8sOverviewTab" class="nav-link active" role="tab" aria-controls="k8sOverview" aria-selected="true" data-default="true" data-toggle="tab">Overview</a>
+        </li>
+        <li class="nav-item">
+          <a href="#k8sNodes" id="k8sNodesTab" class="nav-link" role="tab" aria-controls="k8sNodes" data-toggle="tab">Nodes</a>
+        </li>
+        <li class="nav-item">
+          <a href="#k8sPods" id="k8sPodsTab" class="nav-link" role="tab" aria-controls="k8sPods" data-toggle="tab">Pods</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="card-body tab-content">
+    <div id="k8sOverview" class="tab-pane show active" role="tabpanel" aria-labelledby="k8sOverviewTab">
+      <h5 class="card-title text-white-50"/>
+      <p class="card-text">
+        Nodes: <span id="k8sNodeAvailable">#</span>/<span id="k8sNodeTotal">#</span>
+        <br/>
+        Pods: <span id="k8sPodAvailable">#</span>/<span id="k8sPodTotal">#</span>
+        <br/>
+        Ingress: ...
+      </p>
+    </div>
+    <div id="k8sNodes" class="tab-pane" role="tabpanel" aria-labelledby="k8sNodesTab">
+      <h5 class="card-title">Nodes</h5>
+      <p class="card-text"/>
+    </div>
+    <div id="k8sPods" class="tab-pane" role="tabpanel" aria-labelledby="k8sPodsTab">
+      <h5 class="card-title">Pods</h5>
+      <p class="card-text"/>
+    </div>
+  </div>
+</div>

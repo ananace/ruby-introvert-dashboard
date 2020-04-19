@@ -19,11 +19,28 @@ module IntrovertDashboard
 
       frag = Nokogiri::HTML.fragment('')
       Nokogiri::HTML::Builder.with(frag) do |doc|
-        render_card doc
+        doc.component 'data-component': self.class.api_name, 'data-order': config[:order] do 
+          render_card doc
+
+          if component_css
+            doc.style type: 'text/css' do
+              doc.text component_css
+            end
+          end
+          if component_javascript
+            doc.script type: 'application/javascript' do
+              doc.text component_javascript
+            end
+          end
+        end
       end
 
       content_type 'text/html'
       frag.to_html
+    end
+
+    def initialize *args
+      super
     end
 
     def config
@@ -45,6 +62,61 @@ module IntrovertDashboard
 
     def self.card?
       true
+    end
+
+    protected
+
+    def render_card(doc)
+      extensions = %w[html html.erb rhtml erb]
+      file = extensions.map do |ext|
+        file = File.join(__dir__, 'components', 'assets', "#{self.class.api_name}.#{ext}")
+        next unless File.exist? file
+
+        file
+      end.reject(&:nil?).first
+      puts file
+      return unless file
+
+      mtime = File.stat(file).mtime
+      if @component_card_changetime != mtime
+        @component_card_changetime = mtime
+        @component_card = File.read file
+      end
+
+      card = @component_card
+      if %w[erb rhtml].include? File.extname(file)
+        require 'erb'
+
+        card = ERB.new(card, trim_mode: '-').result(binding)
+      end
+
+      puts "card: #{card.inspect}"
+
+      doc << card
+    end
+
+    def component_javascript
+      file = File.join(__dir__, 'components', 'assets', "#{self.class.api_name}.js")
+      return unless File.exist? file
+
+      mtime = File.stat(file).mtime
+      if @component_javascript_changetime != mtime
+        @component_javascript_changetime = mtime
+        @component_javascript = File.read file
+      end
+      @component_javascript
+    end
+
+    def component_css
+      file = File.join(__dir__, 'components', 'assets', "#{self.class.api_name}.css")
+      return unless File.exist? file
+
+      mtime = File.stat(file).mtime
+      if @component_css_changetime != mtime
+        @component_css_changetime = mtime
+        @component_css = File.read file
+      end
+      @component_css
     end
   end
 end
