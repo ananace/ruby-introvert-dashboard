@@ -57,12 +57,11 @@ module IntrovertDashboard::Components
     end
     get '/status/pods' do
       pods = k8s_query('/api/v1/pods') do |data|
-        healthy = %[running succeeded].freeze
         Hash[data[:items].map do |pod|
           [
             "#{pod.dig(:metadata,:namespace)}/#{pod.dig(:metadata, :name)}",
             {
-              healthy: healthy.include?(pod[:status][:phase].downcase),
+              healthy: pod[:status][:conditions].find { |c| c[:type] == 'Ready' }[:status].downcase == 'true' || pod[:status][:phase].downcase == 'succeeded',
               phase: pod[:status][:phase]
             }
           ]
