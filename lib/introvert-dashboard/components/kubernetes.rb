@@ -49,7 +49,7 @@ module IntrovertDashboard::Components
 
         nodes: nodes.keys,
         errors: Hash[nodes.reject { |_, n| n[:healthy] }.map do |k, n|
-          messages = n[:conditions].map { |_, v| v[:message] }.uniq
+          messages = n[:conditions].reject { |_, v| v[:status] }.map { |_, v| v[:message] }.uniq
 
           [k, messages]
         end]
