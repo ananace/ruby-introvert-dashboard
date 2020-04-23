@@ -162,11 +162,11 @@ module IntrovertDashboard::Components
             end
           end
           %i[average average_day average_night].each do |avg|
-            if source.dig(avg, :symbol).nil?
+            if source.dig(avg, :symbol).nil? && !source.dig(avg, :symbol_id).nil?
               symbols = avg == :average_night ? WEATHER_SYMBOLS_NIGHT : WEATHER_SYMBOLS_DAY
               source[avg][:symbol] = symbols[source[avg][:symbol_id]]
             end
-            if source.dig(avg, :precipitation, :category).nil?
+            if source.dig(avg, :precipitation, :category).nil? && !source.dig(avg, :precipitation, :category_id).nil?
               source[avg][:precipitation][:category] = PRECIP_CATEGORIES[source[avg][:precipitation][:category_id]]
             end
           end
