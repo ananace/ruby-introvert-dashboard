@@ -101,7 +101,7 @@ module IntrovertDashboard::Components
           next if time.day > Time.now.day + 1
 
           target = time.today? ? today : tomorrow
-          
+
           target[:by_hour] << {
             time: time,
             pressure: point[:parameters].find { |p| p[:name] == 'msl' }[:values].first,
