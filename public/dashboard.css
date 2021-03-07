@@ -55,11 +55,11 @@ a {
   color: white;
 }
 a:hover {
-  color: rgb(140, 220, 255);
+  color: white;
 }
 
 a.text-danger:hover, a.text-danger:focus {
-  color: #fc555d !important;
+  color: #dc3545 !important;
 }
 
 .nav-tabs .nav-link.active {

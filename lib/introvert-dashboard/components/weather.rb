@@ -87,10 +87,27 @@ module IntrovertDashboard::Components
       'freezing drizzle',
     ]
 
+    def register(connection)
+      params = { running: true }.dup
+      connection.closed { params[:running] = false }
+
+      Thread.new(params) do |p|
+        loop do
+          break unless p[:running]
+
+          data = get_forecast(config[:lat], config[:lon]).to_json
+          connection.send_event 'weather.forecast', data
+
+          sleep 30 * 60
+        end
+      end
+    end
+
     def get_forecast(lat, lon)
       uri = URI("https://#{API_HOST}/").tap do |u|
         u.path = "/api/category/#{API_CATEGORY}/version/#{API_VERSION}/geotype/point/lon/#{lon}/lat/#{lat}/data.json"
       end
+
       [JSON.parse(Net::HTTP.get(uri), symbolize_names: true)].map do |resp|
         today = { by_hour: [] }
         tomorrow = { by_hour: [] }
@@ -181,5 +198,3 @@ module IntrovertDashboard::Components
     end
   end
 end
-
-

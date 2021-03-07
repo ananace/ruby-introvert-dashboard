@@ -1,9 +1,15 @@
 function init() {
   console.log("Init");
 
+  if (hasSSE()) {
+    startSSE();
+  } else {
+    console.log("SSE support is missing, falling back to polling.");
+    checkForUpdates();
+  }
+
   writeClock();
   createCards();
-  checkForUpdates();
 }
 
 function postInit() {
@@ -66,6 +72,9 @@ function writeClock() {
 }
 
 function registerGlobalHooks() {
+  $('#dashboardTitle').click(function() {
+    location.reload(true);
+  });
   $('.nav-link').click(function(event) {
     var elem = $(event.target);
     var nav = elem.closest('.nav');
@@ -121,9 +130,75 @@ function registerGlobalHooks() {
       nav.data('cur-timeout', id);
     }
   });
+} 
+
+function hasSSE() {
+    return !!window.EventSource;
 }
 
 var pageVersion;
+
+var requestedEvents = [];
+
+var eventSource;
+var eventStream;
+function startSSE() {
+  eventSource = new EventSource('/events');
+  eventSource.addEventListener("dashboard.sse", function(event) {
+    const data = JSON.parse(event.data);
+    console.log("New SSE link established, id " + data.id + ".");
+
+    eventStream = data.id;
+
+    requestedEvents.forEach(function(card) {
+      axios.post('/api/' + card + '/register?stream=' + eventStream);
+    });
+  });
+  eventSource.addEventListener('dashboard.version', function(event) {
+    const data = JSON.parse(event.data);
+
+    if (pageVersion !== undefined && pageVersion != data.version) {
+      console.log("Version updated, reloading.");
+      location.reload(true);
+    }
+
+    pageVersion = data.version;
+  });
+  eventSource.onmessage = function(event) {
+    console.log("SSE link message:", event);
+  };
+  eventSource.onerror = function(err) {
+    console.log("SSE link error:", err);
+
+    setTimeout(function() {
+      if (eventSource.readyState == 2) {
+        startSSE();
+      }
+    }, 30000);
+  };
+  eventSource.onopen = function() {
+    console.log("SSE link opened.");
+  };
+  eventSource.onclose = function() {
+    console.log("SSE link closed.");
+  };
+}
+
+function requestEvents(card) {
+  if (requestedEvents.indexOf(card) != -1) {
+    console.log("Duplicate request for events for " + card);
+    return;
+  }
+
+  console.log("Registering for SSE events for " + card);
+
+  requestedEvents.push(card);
+
+  if (eventStream) {
+    axios.post('/api/' + card + '/register?stream=' + eventStream);
+  }
+}
+
 function checkForUpdates() {
   axios.get('/api/status/version')
     .then(function(resp) {

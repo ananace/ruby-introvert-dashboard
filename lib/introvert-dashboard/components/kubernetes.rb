@@ -11,18 +11,7 @@ module IntrovertDashboard::Components
       data
     end
 
-    get '/' do
-      { status: "ok" }.to_json
-    end
-
-    get '/version' do
-      data = k8s_query('/version')
-      {
-        version: data[:gitVersion]
-      }.to_json
-    end
-
-    get '/status/nodes' do
+    def k8s_nodes
       nodes = k8s_query('/api/v1/nodes') do |data|
         Hash[data[:items].map do |node|
           [
@@ -53,16 +42,17 @@ module IntrovertDashboard::Components
 
           [k, messages]
         end]
-      }.to_json
+      }
     end
-    get '/status/pods' do
+
+    def k8s_pods
       pods = k8s_query('/api/v1/pods') do |data|
         Hash[data[:items].map do |pod|
           [
             "#{pod.dig(:metadata,:namespace)}/#{pod.dig(:metadata, :name)}",
             {
-              healthy: pod[:status][:conditions].find { |c| c[:type] == 'Ready' }[:status].downcase == 'true' || pod[:status][:phase].downcase == 'succeeded',
-              phase: pod[:status][:phase]
+              healthy: pod.dig(:status, :conditions)&.find{ |c| c[:type] == 'Ready' }&.fetch(:status, nil)&.downcase == 'true' || pod.dig(:status, :phase)&.downcase == 'succeeded',
+              phase: pod.dig(:status, :phase)
             }
           ]
         end]
@@ -73,7 +63,43 @@ module IntrovertDashboard::Components
         available: pods.select { |_, p| p[:healthy] }.count,
 
         unhealthy: pods.reject { |_, p| p[:healthy] }.map { |k, _| k }
+      }
+    end
+
+    def register(connection)
+      params = { running: true }.dup
+      connection.closed { params[:running] = false }
+
+      Thread.new(params) do |p|
+        loop do
+          break unless p[:running]
+
+          connection.send_event 'kubernetes.version', { version: k8s_query('/version')[:gitVersion] }
+
+          connection.send_event 'kubernetes.nodes', k8s_nodes
+          connection.send_event 'kubernetes.pods', k8s_pods
+
+          sleep 30 * 60
+        end
+      end
+    end
+
+    get '/' do
+      { status: "ok" }.to_json
+    end
+
+    get '/version' do
+      data = k8s_query('/version')
+      {
+        version: data[:gitVersion]
       }.to_json
+    end
+
+    get '/status/nodes' do
+      k8s_nodes.to_json
+    end
+    get '/status/pods' do
+      k8s_pods.to_json
     end
   end
 end

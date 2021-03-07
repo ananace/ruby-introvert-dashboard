@@ -21,8 +21,10 @@ Gem::Specification.new do |spec|
   spec.files         = Dir['{bin,lib}/**/*']
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'concurrent-ruby'
   spec.add_dependency 'nokogiri'
   spec.add_dependency 'sinatra'
+  spec.add_dependency 'thin'
 
   # For the Sinatra::Reloader
   spec.add_development_dependency 'sinatra-contrib'

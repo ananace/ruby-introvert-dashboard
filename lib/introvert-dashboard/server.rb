@@ -2,6 +2,10 @@ require 'sinatra/base'
 
 module IntrovertDashboard
   class Server < Sinatra::Base
+    def event_server
+      settings.sse_server
+    end
+
     set :public_folder, 'public'
     set :strict_paths, false
 
@@ -10,8 +14,23 @@ module IntrovertDashboard
       register Sinatra::Reloader
     end
 
+    configure :development, :production do
+      enable :logging
+    end
+
     get '/' do
       send_file File.join(settings.public_folder, 'index.html')
+    end
+
+    get '/events', provides: 'text/event-stream' do
+      pass unless request.accept? 'text/event-stream'
+
+      logger.info "Received SSE request, params: #{params}"
+
+      stream :keep_open do |stream|
+        event_server.handle_connection(stream)
+        stream.callback { event_server.remove_connection(stream) }
+      end
     end
 
     get '/api' do

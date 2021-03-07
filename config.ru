@@ -1,6 +1,7 @@
 require 'introvert-dashboard'
 
 IntrovertDashboard::Config.load 'config.yml' if File.exist? 'config.yml'
+IntrovertDashboard::Server.set sse_server: IntrovertDashboard::SSE::Server.new
 
 IntrovertDashboard::Components.constants.each do |const|
   klass = IntrovertDashboard::Components.const_get const

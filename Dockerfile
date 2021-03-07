@@ -1,4 +1,4 @@
-FROM ruby:latest
+FROM ruby:2
 
 ENV APP_HOME /app
 ENV RACK_ENV production

@@ -4,6 +4,8 @@ require 'sinatra/base'
 
 module IntrovertDashboard
   class BaseComponent < Sinatra::Base
+    attr_reader :root
+
     configure :development do
       require 'sinatra/reloader'
       register Sinatra::Reloader
@@ -39,8 +41,17 @@ module IntrovertDashboard
       frag.to_html
     end
 
-    def initialize *args
-      super
+    post '/register' do
+      return pass unless enabled?
+      return pass unless params['stream'] && event_server.has?(params['stream'])
+
+      result = register(event_server.get(params['stream']))
+
+      if result
+        { status: 'success' }.to_json
+      else
+        [400, { status: 'failure' }.to_json]
+      end
     end
 
     def config
@@ -48,8 +59,16 @@ module IntrovertDashboard
       IntrovertDashboard::Config.component(self.class.api_name, user_token: user_token)
     end
 
+    def event_server
+      IntrovertDashboard::Server.settings.sse_server
+    end
+
     def enabled?
       config[:enabled]
+    end
+
+    def register
+      false
     end
 
     def self.api_name

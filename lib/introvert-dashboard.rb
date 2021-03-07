@@ -3,6 +3,8 @@
 require 'introvert-dashboard/base_component'
 require 'introvert-dashboard/config'
 require 'introvert-dashboard/server'
+require 'introvert-dashboard/sse/connection'
+require 'introvert-dashboard/sse/server'
 
 require 'json'
 require 'net/http'
