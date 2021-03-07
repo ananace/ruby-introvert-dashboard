@@ -26,19 +26,21 @@ function reflect(promise){
 
 function createCards() {
   axios.get('/cards').then(function(resp) {
-    queries = []
+    var component;
+    var queries = [];
     for (component in resp.data) {
       console.log("Loading card for " + component);
-      queries.push(axios.get(resp.data[component])
+
+      queries.push(axios.get(resp.data[component], { card: component })
         .then(function(resp) {
           $(resp.data).appendTo('#card-container');
         })
         .catch(function(resp) {
-          console.log('Card for ' + component + ' failed to load');
-          if (resp.data) {
-            console.log(resp.data.error);
+          console.log('Card for ' + resp.config.card + ' failed to load;');
+          if (resp.response.data) {
+            console.log("-", resp.response.data.error);
           } else {
-            console.log(resp);
+            console.log("-", resp);
           }
         })
       );
@@ -59,13 +61,15 @@ function sortCards() {
 
 function writeClock() {
   function checkTime(i) {
-    if (i < 10) {i = "0" + i};
+    if (i < 10) {
+        i = "0" + i;
+    }
     return i;
   }
 
-  var today = new Date();
-  var h = checkTime(today.getHours());
-  var m = checkTime(today.getMinutes());
+  const today = new Date();
+  const h = checkTime(today.getHours());
+  const m = checkTime(today.getMinutes());
   $('#clock').text(h + ':' + m);
 
   setTimeout(writeClock, 1000);
@@ -76,17 +80,16 @@ function registerGlobalHooks() {
     location.reload(true);
   });
   $('.nav-link').click(function(event) {
-    var elem = $(event.target);
-    var nav = elem.closest('.nav');
+    const elem = $(event.target);
+    const nav = elem.closest('.nav');
     if (nav.find('[data-default]').length == 0) {
       return;
     }
 
     var pb = elem.closest('.card-header').siblings('.progress');
     var id = undefined;
-    var pbid = undefined;
 
-    var duration = parseInt(
+    const duration = parseInt(
       elem.closest('.nav-item').data('duration') ||
       nav.data('duration') ||
       '10'
@@ -106,7 +109,7 @@ function registerGlobalHooks() {
         pb = $('<div class="progress" style="height:1px"><div class="progress-bar" role="progressbar" style="width:0"></div></div>').insertAfter(elem.closest('.card-header'));
       }
       
-      var bar = pb.find('.progress-bar');
+      const bar = pb.find('.progress-bar');
       bar.css('transition', 'none')
          .width(0);
 
@@ -121,7 +124,7 @@ function registerGlobalHooks() {
       clearTimeout(parseInt(nav.data('cur-timeout')));
 
       if (id === undefined) {
-        var bar = pb.find('.progress-bar');
+        const bar = pb.find('.progress-bar');
         bar.css('transition', 'width 1s ease')
            .width(0);
       }
@@ -215,20 +218,20 @@ function checkForUpdates() {
 
 function getUrlParameter(name) {
   name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-  var results = regex.exec(location.search);
+  const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  const results = regex.exec(location.search);
   return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-};
+}
 
 // Inject user token into headers for API requests
 var axios = (function() {
-  headers = { };
-  token = getUrlParameter('token');
+  const headers = { };
+  const token = getUrlParameter('token');
   if (token) {
     headers.Authentication = "Bearer " + getUrlParameter('token');
   }
 
-  instance = axios.create({
+  const instance = axios.create({
     headers: headers,
     maxRedirects: 0
   });
