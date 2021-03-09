@@ -2,9 +2,12 @@
 
 require 'introvert-dashboard/base_component'
 require 'introvert-dashboard/config'
+require 'introvert-dashboard/lookup_stack'
 require 'introvert-dashboard/server'
 require 'introvert-dashboard/sse/connection'
 require 'introvert-dashboard/sse/server'
+require 'introvert-dashboard/workers/manager'
+require 'introvert-dashboard/workers/worker'
 
 require 'json'
 require 'net/http'

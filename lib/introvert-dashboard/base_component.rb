@@ -63,6 +63,10 @@ module IntrovertDashboard
       IntrovertDashboard::Server.settings.sse_server
     end
 
+    def workers
+      IntrovertDashboard::Server.settings.workers
+    end
+
     def enabled?
       config[:enabled]
     end

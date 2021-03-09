@@ -2,17 +2,71 @@
 
 module IntrovertDashboard::Components
   class Kubernetes < IntrovertDashboard::BaseComponent
-    def k8s_query(path)
+    class K8sWorker < IntrovertDashboard::Workers::Worker
+      def initialize(config)
+        @config = config
+        @parties = []
+
+        super("kubernetes|#{config[:url]}",
+              binding: binding,
+             &:execute)
+      end
+
+      def add_party(stream)
+        party = { stream: stream, node_hash: nil, pod_hash: nil }
+        puts "#{name}: Adding party #{stream.id}"
+        @parties << party
+
+        stream.closed { remove_party(stream) }
+      end
+
+      def remove_party(stream)
+        puts "#{name}: Removing party #{stream.id}"
+        @parties.delete_if { |p| p[:stream] == stream }
+
+        stop! if @parties.empty?
+      end
+
+      def execute
+        nodes = nil
+        pods = nil
+
+        loop do
+          latest = Kubernetes.k8s_nodes(@config)
+          if nodes != latest
+            nodes = latest
+            @parties.each do |party|
+              party[:stream].send_event 'kubernetes.nodes', latest unless party[:node_hash] == pods.hash
+              party[:node_hash] = pods.hash
+            end
+          end
+
+          latest = Kubernetes.k8s_pods(@config)
+          if pods != latest
+            pods = latest
+            @parties.each do |party|
+              party[:stream].send_event 'kubernetes.pods', latest unless party[:node_hash] == pods.hash
+              party[:node_hash] = pods.hash
+            end
+          end
+
+          wait 30
+        end
+      end
+    end
+
+    def self.k8s_query(path, config)
       uri = URI(config[:url]).tap do |u|
         u.path = path
       end
       data = JSON.parse(Net::HTTP.get(uri), symbolize_names: true)
       return yield data if block_given?
+
       data
     end
 
-    def k8s_nodes
-      nodes = k8s_query('/api/v1/nodes') do |data|
+    def self.k8s_nodes(config)
+      nodes = k8s_query('/api/v1/nodes', config) do |data|
         Hash[data[:items].map do |node|
           [
             node[:metadata][:name],
@@ -45,8 +99,8 @@ module IntrovertDashboard::Components
       }
     end
 
-    def k8s_pods
-      pods = k8s_query('/api/v1/pods') do |data|
+    def self.k8s_pods(config)
+      pods = k8s_query('/api/v1/pods', config) do |data|
         Hash[data[:items].map do |pod|
           [
             "#{pod.dig(:metadata,:namespace)}/#{pod.dig(:metadata, :name)}",
@@ -66,26 +120,30 @@ module IntrovertDashboard::Components
       }
     end
 
+    def k8s_query(path)
+      self.class.k8s_query(path, config)
+    end
+
     def register(connection)
-      params = { running: true }.dup
-      connection.closed { params[:running] = false }
+      main = workers.get("kubernetes|#{config[url]}")
+      main ||= workers.register(K8sWorker.new(config))
 
-      Thread.new(params) do |p|
+      main.add_party(connection)
+
+      workers.register_sse('kubernetes', connection, params: { config: config }) do
+        version = nil
         loop do
-          break unless p[:running]
+          latest = Kubernetes.k8s_query('/version', config)[:gitVersion]
+          connection.send_event 'kubernetes.version', { version: latest } if version != latest
+          version = latest
 
-          connection.send_event 'kubernetes.version', { version: k8s_query('/version')[:gitVersion] }
-
-          connection.send_event 'kubernetes.nodes', k8s_nodes
-          connection.send_event 'kubernetes.pods', k8s_pods
-
-          sleep 30 * 60
+          wait 30 * 60
         end
       end
     end
 
     get '/' do
-      { status: "ok" }.to_json
+      { status: 'ok' }.to_json
     end
 
     get '/version' do

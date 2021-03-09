@@ -44,8 +44,8 @@ module IntrovertDashboard::Components
       'wi-sleet', # Heavy sleet
       'wi-snow', # Light snowfall
       'wi-snow', # Moderate snowfall
-      'wi-snow', # Heavy snowfall
-    ]
+      'wi-snow' # Heavy snowfall
+    ].freeze
     WEATHER_SYMBOLS_NIGHT = [
       nil,
       'wi-night-clear', # Clear sky
@@ -74,8 +74,8 @@ module IntrovertDashboard::Components
       'wi-sleet', # Heavy sleet
       'wi-snow', # Light snowfall
       'wi-snow', # Moderate snowfall
-      'wi-snow', # Heavy snowfall
-    ]
+      'wi-snow' # Heavy snowfall
+    ].freeze
 
     PRECIP_CATEGORIES = [
       nil,
@@ -84,21 +84,16 @@ module IntrovertDashboard::Components
       'rain',
       'drizzle',
       'freezing rain',
-      'freezing drizzle',
-    ]
+      'freezing drizzle'
+    ].freeze
 
     def register(connection)
-      params = { running: true }.dup
-      connection.closed { params[:running] = false }
-
-      Thread.new(params) do |p|
+      workers.register_sse('forecast', connection, binding: binding) do
         loop do
-          break unless p[:running]
-
           data = get_forecast(config[:lat], config[:lon]).to_json
           connection.send_event 'weather.forecast', data
 
-          sleep 30 * 60
+          wait 30 * 60
         end
       end
     end

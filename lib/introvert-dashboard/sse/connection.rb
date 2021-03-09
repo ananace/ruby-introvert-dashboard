@@ -12,6 +12,7 @@ module IntrovertDashboard::SSE
     def initialize(server, stream, id: nil, heartbeat_interval: HEARTBEAT_INTERVAL)
       @server = server
       @stream = stream
+      @active = true
 
       @last_send = Time.now
       @heartbeat_interval = heartbeat_interval
@@ -23,6 +24,10 @@ module IntrovertDashboard::SSE
 
     def logger
       @logger ||= @server.logger
+    end
+
+    def alive?
+      @active
     end
 
     def closed(&block)
@@ -69,6 +74,7 @@ module IntrovertDashboard::SSE
     private
 
     def closing
+      @active = false
       @handlers.each(&:call)
     end
   end
