@@ -33,20 +33,20 @@ module IntrovertDashboard::Components
 
         loop do
           latest = Kubernetes.k8s_nodes(@config)
-          if nodes != latest
-            nodes = latest
+          if nodes != latest.hash
+            nodes = latest.hash
             @parties.each do |party|
-              party[:stream].send_event 'kubernetes.nodes', latest unless party[:node_hash] == pods.hash
-              party[:node_hash] = pods.hash
+              party[:stream].send_event 'kubernetes.nodes', latest unless party[:node_hash] == nodes
+              party[:node_hash] = nodes
             end
           end
 
           latest = Kubernetes.k8s_pods(@config)
-          if pods != latest
-            pods = latest
+          if pods != latest.hash
+            pods = latest.hash
             @parties.each do |party|
-              party[:stream].send_event 'kubernetes.pods', latest unless party[:node_hash] == pods.hash
-              party[:node_hash] = pods.hash
+              party[:stream].send_event 'kubernetes.pods', latest unless party[:pods_hash] == pods
+              party[:pod_hash] = pods
             end
           end
 
