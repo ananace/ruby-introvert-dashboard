@@ -50,7 +50,7 @@ module IntrovertDashboard::Components
             end
           end
 
-          wait 30
+          wait 60
         end
       end
     end
