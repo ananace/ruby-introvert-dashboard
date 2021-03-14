@@ -49,6 +49,7 @@ module IntrovertDashboard::Workers
       @workers.delete worker
     end
 
+    # TODO Use a thread pool and separate threads, to remove the need for a wrapper and a wait method
     def start_thread
       @thread = Thread.new do
         loop do

@@ -66,7 +66,7 @@ module IntrovertDashboard::SSE
     def heartbeat_thread
       loop do
         @streams.each do |conn|
-          conn.send_comment("heartbeat") if conn.heartbeat_required?
+          conn.send_comment('heartbeat') if conn.heartbeat_required?
         end
 
         sleep 5
