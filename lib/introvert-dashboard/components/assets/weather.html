@@ -25,9 +25,17 @@
         </span>
       </h5>
       <h5 class="card-subtitle text-white-50">
+        <i data-value="weather.now.wind_dir" class="wi wi-wind"></i>
+        <span data-value="weather.now.wind_speed">?</span><small>m/s</small>
+        &nbsp;<i class="wi wi-humidity mr-1"></i><span data-value="weather.now.humidity">?</span><small>%</small>
+        <span data-value="weather.now.precipitation" class="d-none align-top">
+          <br/><i class="wi wi-cloud-down mr-1"></i>
+          <small style="font-size:70%">
+            <span data-value="weather.now.pmin">?</span> - <span data-value="weather.now.pmax">?</span>
+            <small class="align-baseline">mm/h</small> <span data-value="weather.now.pcat">?</span>
+          </small>
+        </span>
       </h5>
-      <p class="card-text">
-      </p>
     </div>
     <div id="weatherToday" class="tab-pane" role="tabpanel" aria-labelledby="weatherTodayTab">
       <h5 class="card-title">
@@ -40,8 +48,18 @@
           </span>
         </span>
       </h5>
-      <h5 class="card-subtitle text-white-50" />
-      <p class="card-text" />
+      <h5 class="card-subtitle text-white-50">
+        <i data-value="weather.today.wind_dir" class="wi wi-wind"></i>
+        <span data-value="weather.today.wind_speed">?</span><small>m/s</small>
+        &nbsp;<i class="wi wi-humidity mr-1"></i><span data-value="weather.today.humidity">?</span><small>%</small>
+        <span data-value="weather.now.precipitation" class="d-none align-top">
+          <br/><i class="wi wi-cloud-down mr-1"></i>
+          <small style="font-size:70%">
+            <span data-value="weather.today.pmin">?</span> - <span data-value="weather.today.pmax">?</span>
+            <small class="align-baseline">mm/h</small> <span data-value="weather.today.pcat">?</span>
+          </small>
+        </span>
+      </h5>
     </div>
     <div id="weatherTomorrow" class="tab-pane" role="tabpanel" aria-labelledby="weatherTomorrowTab">
       <h5 class="card-title">
@@ -54,8 +72,18 @@
           </span>
         </span>
       </h5>
-      <h5 class="card-subtitle text-white-50" />
-      <p class="card-text" />
+      <h5 class="card-subtitle text-white-50">
+        <i data-value="weather.tomorrow.wind_dir" class="wi wi-wind"></i>
+        <span data-value="weather.tomorrow.wind_speed">?</span><small>m/s</small>
+        &nbsp;<i class="wi wi-humidity mr-1"></i><span data-value="weather.tomorrow.humidity">?</span><small>%</small>
+        <span data-value="weather.tomorrow.precipitation" class="d-none align-top">
+          <br/><i class="wi wi-cloud-down mr-1"></i>
+          <small style="font-size:70%">
+            <span data-value="weather.tomorrow.pmin">?</span> - <span data-value="weather.tomorrow.pmax">?</span>
+            <small class="align-baseline">mm/h</small> <span data-value="weather.tomorrow.pcat">?</span>
+          </small>
+        </span>
+      </h5>
     </div>
   </div>
 </div>

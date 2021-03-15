@@ -16,6 +16,8 @@ module IntrovertDashboard::Components
     API_CATEGORY = 'pmp3g'
     API_VERSION = '2'
 
+    API_CORE_URI = "/api/category/#{API_CATEGORY}/version/#{API_VERSION}"
+
     WEATHER_SYMBOLS_DAY = [
       nil,
       'wi-day-sunny', # Clear sky
@@ -100,7 +102,7 @@ module IntrovertDashboard::Components
 
     def get_forecast(lat, lon)
       uri = URI("https://#{API_HOST}/").tap do |u|
-        u.path = "/api/category/#{API_CATEGORY}/version/#{API_VERSION}/geotype/point/lon/#{lon}/lat/#{lat}/data.json"
+        u.path = "#{API_CORE_URI}/geotype/point/lon/#{lon}/lat/#{lat}/data.json"
       end
 
       [JSON.parse(Net::HTTP.get(uri), symbolize_names: true)].map do |resp|
