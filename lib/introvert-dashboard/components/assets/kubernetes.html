@@ -20,9 +20,9 @@
     <div id="k8sOverview" class="tab-pane active" role="tabpanel" aria-labelledby="k8sOverviewTab">
       <h5 class="card-title"><img src="/vendor/kubernetes-icon-white.svg" class="mr-2" style="width: 2rem"/><span class="version text-white-50 align-middle"></span></h5>
       <p class="card-text">
-        Nodes: <span id="k8sNodeAvailable">#</span>/<span id="k8sNodeTotal">#</span>
+        Nodes: <span data-value="nodes.available">#</span>/<span data-value="nodes.total">#</span>
         <br/>
-        Pods: <span id="k8sPodAvailable">#</span>/<span id="k8sPodTotal">#</span>
+        Pods: <span data-value="pods.available">#</span>/<span data-value="pods.total">#</span>
         <br/>
         Ingress: ...
       </p>
