@@ -62,8 +62,12 @@ module IntrovertDashboard::Workers
 
     def step
       @workers.each do |worker|
-        worker.run if worker.status == :running
-        worker.wake if worker.status == :sleeping && worker.time_to_wake?
+        begin
+          worker.run if worker.status == :running
+          worker.wake if worker.status == :sleeping && worker.time_to_wake?
+        rescue StandardError => ex
+          logger.error "Worker #{worker} failed step with #{ex.class}: #{ex.message}"
+        end
       end
 
       @workers.delete_if { |w| w.status == :stopping }
