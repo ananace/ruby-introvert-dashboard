@@ -58,8 +58,19 @@ module IntrovertDashboard::Components
     def self.k8s_query(path, config)
       uri = URI(config[:url]).tap do |u|
         u.path = path
+
+        u['authorization'] = "Bearer #{config[:token] || File.read('/var/run/secrets/kubernetes.io/serviceaccount/token')}"
       end
-      data = JSON.parse(Net::HTTP.get(uri), symbolize_names: true)
+
+      data = if uri.scheme == 'https' && File.exist?('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
+               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ca_path: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt') do |http|
+                 http.get(uri.request_uri)
+               end
+             else
+               Net::HTTP.get(uri)
+             end
+
+      data = JSON.parse(data, symbolize_names: true)
       return yield data if block_given?
 
       data
