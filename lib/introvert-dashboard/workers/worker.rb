@@ -30,7 +30,12 @@ module IntrovertDashboard::Workers
           stack.run_proc(@block)
         end
       end
-      @fiber.resume
+
+      if @fiber.alive?
+        @fiber.resume
+      else
+        @status = :stopping
+      end
       true
     rescue FiberError
       false
@@ -73,7 +78,11 @@ module IntrovertDashboard::Workers
     end
 
     def wake
-      @fiber&.resume
+      if @fiber.alive?
+        @fiber&.resume
+      else
+        @status = :stopping
+      end
     end
 
     class Wrapper
