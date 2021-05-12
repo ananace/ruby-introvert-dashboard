@@ -33,8 +33,6 @@ module IntrovertDashboard::Components
         pods = nil
 
         loop do
-          STDERR.puts "#{name} - K8s worker loop."
-
           latest = Kubernetes.k8s_query('/version', @config)
           version = latest.hash
           @parties.each do |party|
