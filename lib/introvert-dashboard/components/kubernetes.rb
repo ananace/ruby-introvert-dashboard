@@ -13,7 +13,7 @@ module IntrovertDashboard::Components
       end
 
       def add_party(stream)
-        party = { stream: stream, node_hash: nil, pod_hash: nil }
+        party = { stream: stream, node_hash: nil, pod_hash: nil, version_hash: nil }
         puts "#{name}: Adding party #{stream.id}"
         @parties << party
 
@@ -28,26 +28,32 @@ module IntrovertDashboard::Components
       end
 
       def execute
+        version = nil
         nodes = nil
         pods = nil
 
         loop do
+          STDERR.puts "#{name} - K8s worker loop."
+
+          latest = Kubernetes.k8s_query('/version', @config)
+          version = latest.hash
+          @parties.each do |party|
+            party[:stream].send_event 'kubernetes.version', { version: latest[:gitVersion] } unless party[:version_hash] == version
+            party[:version_hash] = version
+          end
+
           latest = Kubernetes.k8s_nodes(@config)
-          if nodes != latest.hash
-            nodes = latest.hash
-            @parties.each do |party|
-              party[:stream].send_event 'kubernetes.nodes', latest unless party[:node_hash] == nodes
-              party[:node_hash] = nodes
-            end
+          nodes = latest.hash
+          @parties.each do |party|
+            party[:stream].send_event 'kubernetes.nodes', latest unless party[:node_hash] == nodes
+            party[:node_hash] = nodes
           end
 
           latest = Kubernetes.k8s_pods(@config)
-          if pods != latest.hash
-            pods = latest.hash
-            @parties.each do |party|
-              party[:stream].send_event 'kubernetes.pods', latest unless party[:pods_hash] == pods
-              party[:pod_hash] = pods
-            end
+          pods = latest.hash
+          @parties.each do |party|
+            party[:stream].send_event 'kubernetes.pods', latest unless party[:pods_hash] == pods
+            party[:pod_hash] = pods
           end
 
           wait 60
@@ -60,10 +66,19 @@ module IntrovertDashboard::Components
         u.path = path
       end
 
+      token = config[:token]
+      token ||= File.read('/var/run/secrets/kubernetes.io/serviceaccount/token') if File.exist? '/var/run/secrets/kubernetes.io/serviceaccount/token'
       data = if uri.scheme == 'https' && File.exist?('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
-               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ca_path: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt') do |http|
+               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ssl_version: :TLSv1_3, ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt') do |http|
                  req = Net::HTTP::Get.new uri.request_uri
-                 req['authorization'] = "Bearer #{config[:token] || File.read('/var/run/secrets/kubernetes.io/serviceaccount/token')}"
+                 req['authorization'] = "Bearer #{token}" if token
+                 resp = http.request req
+                 resp.body
+               end
+             elsif uri.scheme == 'https'
+               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ssl_version: :TLSv1_3, verify_mode: ::OpenSSL::SSL::VERIFY_NONE) do |http|
+                 req = Net::HTTP::Get.new uri.request_uri
+                 req['authorization'] = "Bearer #{token}" if token
                  resp = http.request req
                  resp.body
                end
@@ -141,17 +156,6 @@ module IntrovertDashboard::Components
       main ||= workers.register(K8sWorker.new(config))
 
       main.add_party(connection)
-
-      workers.register_sse('kubernetes', connection, params: { config: config }) do
-        version = nil
-        loop do
-          latest = Kubernetes.k8s_query('/version', config)[:gitVersion]
-          connection.send_event 'kubernetes.version', { version: latest } if version != latest
-          version = latest
-
-          wait 30 * 60
-        end
-      end
     end
 
     get '/' do

@@ -42,8 +42,8 @@ module IntrovertDashboard
     end
 
     post '/register' do
-      return pass unless enabled?
-      return pass unless params['stream'] && event_server.has?(params['stream'])
+      return [404, { status: 'not enabled' }.to_json] unless enabled?
+      return [400, { status: 'missing stream' }] unless params['stream'] && event_server.has?(params['stream'])
 
       result = register(event_server.get(params['stream']))
 
@@ -55,7 +55,8 @@ module IntrovertDashboard
     end
 
     def config
-      user_token = request.env['HTTP_AUTHENTICATION'].gsub('Bearer ', '') if request.env.key? 'HTTP_AUTHENTICATION'
+      user_token = request.env['HTTP_AUTHORIZATION'].gsub('Bearer ', '') if request.env.key? 'HTTP_AUTHORIZATION'
+      user_token ||= request.env['HTTP_AUTHENTICATION'].gsub('Bearer ', '') if request.env.key? 'HTTP_AUTHENTICATION'
       IntrovertDashboard::Config.component(self.class.api_name, user_token: user_token)
     end
 

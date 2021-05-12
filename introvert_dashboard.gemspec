@@ -22,10 +22,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'concurrent-ruby'
+  spec.add_dependency 'json'
   spec.add_dependency 'nokogiri'
   spec.add_dependency 'sinatra'
   spec.add_dependency 'thin'
 
+  spec.add_development_dependency 'minitest'
+  spec.add_development_dependency 'rake'
   # For the Sinatra::Reloader
   spec.add_development_dependency 'sinatra-contrib'
 end
