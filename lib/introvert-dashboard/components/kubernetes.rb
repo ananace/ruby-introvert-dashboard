@@ -64,25 +64,25 @@ module IntrovertDashboard::Components
         u.path = path
       end
 
+      opts = {
+        use_ssl: uri.scheme == 'https'
+      }
+      opts[:ssl_version] = :TLSv1_3 if opts[:use_ssl] # Avoid potential SSLv3 issue
+      if File.exist?('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
+        opts[:ca_file] = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+      else
+        opts[:verify_mode] = ::OpenSSL::SSL::VERIFY_NONE
+      end
+
       token = config[:token]
       token ||= File.read('/var/run/secrets/kubernetes.io/serviceaccount/token') if File.exist? '/var/run/secrets/kubernetes.io/serviceaccount/token'
-      data = if uri.scheme == 'https' && File.exist?('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt')
-               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ssl_version: :TLSv1_3, ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt') do |http|
-                 req = Net::HTTP::Get.new uri.request_uri
-                 req['authorization'] = "Bearer #{token}" if token
-                 resp = http.request req
-                 resp.body
-               end
-             elsif uri.scheme == 'https'
-               Net::HTTP.start(uri.host, uri.port, use_ssl: true, ssl_version: :TLSv1_3, verify_mode: ::OpenSSL::SSL::VERIFY_NONE) do |http|
-                 req = Net::HTTP::Get.new uri.request_uri
-                 req['authorization'] = "Bearer #{token}" if token
-                 resp = http.request req
-                 resp.body
-               end
-             else
-               Net::HTTP.get(uri)
-             end
+
+      data = Net::HTTP.start(uri.host, uri.port, **opts) do |http|
+        req = Net::HTTP::Get.new uri.request_uri
+        req['authorization'] = "Bearer #{token}" if token
+        resp = http.request req
+        resp.body
+      end
 
       data = JSON.parse(data, symbolize_names: true)
       return yield data if block_given?
